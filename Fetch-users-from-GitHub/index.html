@@ -1,0 +1,29 @@
+<!doctype html>
+<script src="https://en.js.cx/test/libs.js"></script>
+<script src="test.js"></script>
+<script>
+
+  async function getUsers(names) {
+    /* your code */
+    // create an arr where we will store fetched data and return it at the end
+    const output = [];
+
+    // loop over all names and make a request for each one
+    for (let name of names) {
+        // url is different for each user
+        const url = `https://api.github.com/users/${name}`;
+        const response = await fetch(url);
+        // if request failed, response status will not be OK and in that case we return null
+        if (!response.ok) {
+            output.push(null)
+        }
+        // in other case we store the returned data in an array that will be returned at the end
+        const result = await response.json();
+        output.push(result);
+    }
+    return output;
+  }
+
+</script>
+
+</html>
