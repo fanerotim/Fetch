@@ -1,0 +1,73 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch with AbortController</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1 class="heading">Demo of fetch with AbortController</h1>
+    <button onclick="handleClick()">Click me to fetch and display users</button>
+    <button onclick="handleAbortedClick()">Click me to fetch users.</button>
+    <script>
+
+        const url = 'https://jsonplaceholder.typicode.com/users'
+
+        function handleClick() {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => renderUsers(data))
+        }
+
+        function renderUsers(users) {
+
+            // if we fetched the users already, return as we do not want to fetch the same data again
+            if (document.querySelector('ul')) {
+                return;
+            }
+
+            // if there is an error message from the aborted fetch, remove it
+            if (document.querySelector('p')) {
+                document.querySelector('p').remove();
+            }
+
+            // check if fetch was aborted
+            if (users.aborted) {
+                const errorMessage = document.createElement('p');
+                errorMessage.innerText = users.reason;
+                document.body.append(errorMessage);
+                return;
+            }
+
+            const ul = document.createElement('ul');
+
+            for (let user of users) {
+                const li = document.createElement('li');
+                li.innerText = user.name;
+                ul.append(li);
+            }
+            document.body.append(ul);
+        }
+
+        // example with AbortController
+        async function handleAbortedClick() {
+            const controller = new AbortController();
+            // emit abort event after 1s
+            setTimeout(() => controller.abort(), 1000);
+
+            // make a fetch req
+            const response = await fetch(url, {
+                signal: controller.signal
+            })
+
+            // listen for abort events
+            controller.signal.addEventListener('abort', () => {
+                renderUsers(controller.signal)
+            })
+        }
+    </script>
+</body>
+
+</html>
